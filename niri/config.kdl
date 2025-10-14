@@ -1,9 +1,5 @@
 spawn-at-startup "xwayland-satellite"
 
-environment {
-  DISPLAY ":0"
-}
-
 input {
     keyboard {
 
@@ -54,7 +50,7 @@ layout {
     default-column-width { proportion 0.5; }
 
     focus-ring {
-        width 2
+        width 1
         active-color "#f1be9b"    // From your River focused color
         inactive-color "#665C54"  // From your River unfocused color
     }
@@ -74,16 +70,10 @@ layout {
 }
 
 // Startup applications - equivalent to your River executes section
-spawn-at-startup "mako"
 spawn-at-startup "pipewire"
-spawn-at-startup "kanshi"
-spawn-at-startup "wlsunset -s 21:00 -S 07:00"
-spawn-at-startup "swayidle -w timeout 900 'wlopm --off \"*\"' resume 'wlopm --on \"*\"' before-sleep 'lock'"
 spawn-at-startup "mpd"
-spawn-at-startup "$HOME/.local/bin/wallpaper-launch.sh"
 spawn-at-startup "qs"
-// Equivalent to River's hide-cursor settings
-// Note: Niri handles cursor hiding automatically
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 
 prefer-no-csd
 
@@ -91,7 +81,7 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 animations {
     // Keep animations on but subtle
-    slowdown 0.8
+    slowdown 0.7
 }
 
 // Window rules
@@ -107,19 +97,29 @@ window-rule {
     open-floating true
 }
 
-// MPV floating and sticky-like behavior (always visible)
 window-rule {
-    match app-id="mpv"
+    match app-id=r#"^vmware.*$"#
     open-floating true
 }
+
+window-rule {
+    match title=r#".*VMware.*$"#
+    open-floating true
+}
+
+window-rule {
+    match app-id="kitty"
+    opacity 0.95
+}
+
 
 binds {
     // Help overlay
     Mod+Shift+Slash { show-hotkey-overlay; }
-
+    Print { screenshot; }
     // Core window management - matching River's Super+W, Super+Return
     Mod+W { close-window; }
-    Mod+Return { spawn "ghostty"; }
+    Mod+Return { spawn "kitty"; }
     Mod+Shift+Return { center-column; } // Similar to River's zoom
     
     // Fullscreen and floating - matching River's Super+F, Super+Shift+F
@@ -179,13 +179,7 @@ binds {
     Mod+BracketRight { focus-monitor-right; }
     Mod+Shift+BracketLeft { move-column-to-monitor-left; }
     Mod+Shift+BracketRight { move-column-to-monitor-right; }
-
-    // Screenshots - matching River's Print key bindings
-    Print { spawn "grim -g \"$(slurp)\" - | wl-copy"; }
-    Mod+Print { spawn "grim -g \"$(slurp)\" - | swappy -f -"; }
-    Shift+Print { spawn "grim - | wl-copy"; }
-    Mod+Shift+Print { spawn "menurecord kill"; }
-
+   
     // Function keys and media controls
     XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
